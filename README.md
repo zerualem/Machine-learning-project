@@ -1,1 +1,1 @@
-#Machine learning project using R for cancer dataset from Kaggle.com
+#Machine learning project using R for breast cancer wisconsin dataset from Kaggle.com
