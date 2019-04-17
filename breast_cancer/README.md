@@ -1,4 +1,4 @@
-Introduction
+# Introduction
 ------------
 
 The procedure adopted here follows the suggestions from Applied
