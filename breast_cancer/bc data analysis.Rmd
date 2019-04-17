@@ -2,7 +2,9 @@
 title: "Breast cancer data analysis"
 author: "Zerihun A Bekele"
 date: "April 24, 2017"
-output: html_document
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -62,7 +64,7 @@ It might be beneficial to transform our data by scaling and centering. This will
 
 In addition to that we can transform the data for skewed predictors in our data.
 
-The caret package has nice packaged to help us transform our data as desired. Here we will use preProcess and predict function to transform the data and conduct PCA on the transformed data.
+The caret package has nice packages to help us transform our data as desired. Here we will use preProcess and predict function to transform the data and conduct principal component analysis (PCA) on the transformed data.
 
 ```{r}
 # define the transformation or pre-processing 
@@ -73,7 +75,7 @@ head(bc.transformed[,1:4])
 ```
 ## PCA and Proportion of variance explaind (PVE)
 
-Here we conduct PCA on the transformed data and calculate the PVE using r base functions.
+Here we conduct principal component analysis (PCA) on the transformed data and calculate the PVE using r base functions.
 
 ```{r}
 # Using 
