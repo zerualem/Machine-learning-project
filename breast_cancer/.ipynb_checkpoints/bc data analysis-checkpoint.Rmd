@@ -1,0 +1,97 @@
+---
+title: "Breast cancer data analysis"
+author: "Zerihun A Bekele"
+date: "April 24, 2017"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(reshape2)
+library(caret)
+```
+## Introduction
+
+
+The procedure adopted here follows the suggestions from Applied predictive modeling and Introduction to Statistical Learning books.
+
+
+## Let us first import the data
+
+```{r}
+bcData <- read.csv("bc.data.csv", header = T)
+head(bcData)
+#Remove the last column
+bcData <- bcData[,-33]
+#Get the response variable
+segmentation <- bcData[,2]
+head(bcData)
+#Remove the first two columns
+bcData <- bcData[,-c(1:2)]
+```
+
+
+## Filtering the data
+
+Looking at the data the first thing we notice is that it contains a number of correlated predictors such as radius, area, perimeter and shape as a linear or some form of combination of each other. In this kind of situations it will make our analysis more robust and easy to identify and remove highly correlated predicators.
+
+Let's start first handle collinearity and remove some predictors
+```{r fig.width=9, fig.height=9}
+# calculate collinearity
+correlations <- cor(bcData)
+dim(correlations)
+library(corrplot)
+corrplot(correlations, order = "hclust", tl.cex=1, addrect = 8)
+```
+
+Let use the findcorrelation() function from caret package to remove highly correlated predictors
+
+```{r}
+# remove predictors based on whose correlation is above 0.85. This function uses
+# a heuristic algorithm to determine which variable should be removed instead selecting blindly
+highCorr <- findCorrelation(correlations, cutoff = .85)
+length(highCorr)
+#we have 13 highly correlated predictors to be removed
+filteredBcData <- bcData[, -highCorr]
+```
+## Data transformation
+
+It might be beneficial to transform our data by scaling and centering. This will be necessary especially for some machine learning algorithms that best perform on centered and scaled data.
+
+In addition to that we can transform the data for skewed predictors in our data.
+
+The caret package has nice packages to help us transform our data as desired. Here we will use preProcess and predict function to transform the data and conduct principal component analysis (PCA) on the transformed data.
+
+```{r}
+# define the transformation or pre-processing 
+bc.trans <- preProcess(filteredBcData, method = c("BoxCox", "center", "scale"))
+#apply the trasnformation
+bc.transformed <- predict(bc.trans, filteredBcData)
+head(bc.transformed[,1:4])
+```
+## PCA and Proportion of variance explaind (PVE)
+
+Here we conduct principal component analysis (PCA) on the transformed data and calculate the PVE using r base functions.
+
+```{r}
+# Using 
+pca.out <- prcomp(bc.transformed)
+#calculate the standard deviation
+pca.var = pca.out$sdev^2
+
+#Calculate proportion of variance explained
+pve = pca.var/sum(pca.var)
+z = seq(1,17)
+
+#Calculate cummulative PVE
+cumpve = cumsum(pve)
+pve.table = as.data.frame(cbind(z,pve, cumpve))
+ggplot(pve.table, aes(x=z,y=pve))+geom_point()
+
+ggplot(pve.table, aes(x=z,y=cumpve))+geom_point()+geom_abline(intercept=0.95, slope = 0, color="red")
+```
+
